@@ -1,0 +1,12 @@
+{
+  "name": "fluxobot-railway",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "npm --prefix ./spoiler-bot-command-center-main ci && npm --prefix ./spoiler-bot-command-center-main run build",
+    "start": "npm --prefix ./spoiler-bot-command-center-main start",
+    "followups": "node scripts/followups.mjs"
+  }
+}

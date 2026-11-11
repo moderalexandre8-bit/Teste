@@ -1,0 +1,26 @@
+{
+  "name": "tigerbot-android",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cap:sync": "cap sync android",
+    "android:debug": "npm run cap:sync && cd android && gradlew.bat assembleDebug",
+    "assets:android": "capacitor-assets generate --android --assetPath resources --iconBackgroundColor \"#101323\" --iconBackgroundColorDark \"#101323\" --splashBackgroundColor \"#101323\" --splashBackgroundColorDark \"#101323\""
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/app-launcher": "8.0.1",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/preferences": "^8.0.0",
+    "@capacitor/push-notifications": "^8.1.3",
+    "@capacitor/status-bar": "8.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "8.6.0",
+    "typescript": "^7.0.2"
+  }
+}

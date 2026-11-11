@@ -1,0 +1,11 @@
+# Tasks
+- [x] Apply uploaded FluxoBot logo across branding and favicon.
+- [x] Reduce panel transfers and redundant reloads.
+- [x] Reduce bot response delays and validate affected flows.
+- [x] Media channel per bot (cached Telegram file ids) + album grouping for photos/videos.
+- [x] /start sales layout: free media → call text → colored plan buttons.
+- [x] Multi-account: remove shared admin password login; public sign up / sign in (email + Google).
+- [x] Interactive sign-up screen + onboarding wizard (name, @username, photo).
+- [x] Profile page: photo, name, @username, bio, password.
+- [x] Every bot, gateway, plan, spoiler, sale and withdrawal belongs to one account; each account sees only its own.
+- [x] Limit: max 3 bots per account (server + database), with test.

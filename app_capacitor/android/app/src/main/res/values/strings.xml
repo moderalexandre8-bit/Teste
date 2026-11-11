@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TigerBot</string>
+    <string name="title_activity_main">TigerBot</string>
+    <string name="package_name">info.tigerbot.app</string>
+    <string name="custom_url_scheme">info.tigerbot.app</string>
+</resources>

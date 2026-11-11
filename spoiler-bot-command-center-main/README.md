@@ -1,0 +1,64 @@
+# Spoiler Bot Command Center
+
+## Supabase próprio
+
+O app usa Supabase Auth e o banco Postgres do projeto Supabase configurado no `.env`; a integração de autenticação do Lovable Cloud foi removida.
+
+1. Crie um projeto no Supabase.
+2. No SQL Editor desse projeto, execute [`supabase/migrations/20261105090000_initial_schema.sql`](./supabase/migrations/20261105090000_initial_schema.sql). Esse é o script consolidado: cria as tabelas, índices, funções, políticas RLS e buckets usados pelo app e inclui os registros de perfil, bot, gateway, planos, leads, venda e assinatura fornecidos. Os dados são associados à conta Auth de `alexandremoder0707@gmail.com`, mesmo que o UUID dessa conta seja diferente no projeto novo. Se o script avisar que o seed foi ignorado, crie a conta pelo fluxo seguro do Supabase Auth e execute o SQL novamente. A execução pode ser retomada sem apagar registros.
+3. Execute também [`supabase/migrations/20261107090000_web_upgrade.sql`](./supabase/migrations/20261107090000_web_upgrade.sql) no SQL Editor. Essa migração habilita o limite de 100 bots, funis de acompanhamento, escolha dos bots que oferecem cada plano e ranking global de vendedores.
+4. Execute [`supabase/migrations/20261107093000_dashboard_bot_templates.sql`](./supabase/migrations/20261107093000_dashboard_bot_templates.sql) em seguida. Ela adiciona os cinco modelos de mensagens do Telegram e registra cada `/start` para os gráficos detalhados do dashboard.
+5. Execute [`supabase/migrations/20261107094000_admin_panel.sql`](./supabase/migrations/20261107094000_admin_panel.sql) para criar as tabelas privadas de substituição de credenciais e auditoria. Depois execute [`supabase/migrations/20261110120000_update_admin_email.sql`](./supabase/migrations/20261110120000_update_admin_email.sql) para conceder acesso administrativo à conta confirmada `tigerbot.info@gmail.com` e remover esse acesso da conta anterior. Mudanças feitas na aba Administração exigem a chave secreta Supabase configurada exclusivamente no servidor.
+6. Execute [`supabase/migrations/20261107100000_admin_user_listing.sql`](./supabase/migrations/20261107100000_admin_user_listing.sql) para habilitar a listagem paginada de usuários no painel administrativo.
+7. Execute [`supabase/migrations/20261107103000_bot_message_customization.sql`](./supabase/migrations/20261107103000_bot_message_customization.sql) para habilitar os modelos e cores dos botões de planos, planos em destaque, textos dos botões do funil e mídias opcionais nas mensagens do `/start` e dos lembretes.
+8. Execute [`supabase/migrations/20261107114000_bot_onboarding_and_activity_reset.sql`](./supabase/migrations/20261107114000_bot_onboarding_and_activity_reset.sql) para habilitar instruções de início, estilos de botão e limpeza segura de atividade. Essa limpeza oculta os registros antigos do painel e remove os eventos de `/start`, sem apagar leads, pedidos ou vendas e sem cancelar Pix.
+   - Execute também [`supabase/migrations/20261107124000_recovery_funnels_and_dark_theme.sql`](./supabase/migrations/20261107124000_recovery_funnels_and_dark_theme.sql) para criar a área de funis com etapas personalizadas, vínculo múltiplo por bot e cache de mídias do Telegram.
+9. Execute [`supabase/migrations/20261107121000_admin_clear_activity_delete_guard.sql`](./supabase/migrations/20261107121000_admin_clear_activity_delete_guard.sql) para corrigir a validação do `DELETE` na limpeza global de starts.
+10. Execute [`supabase/migrations/20261107133000_tax_bot_and_test_accounts.sql`](./supabase/migrations/20261107133000_tax_bot_and_test_accounts.sql) para habilitar o Bot-Taxa, vincular cobranças ao pedido original e cadastrar contas de teste.
+11. Execute [`supabase/migrations/20261107160000_community_groups.sql`](./supabase/migrations/20261107160000_community_groups.sql) para cadastrar grupos da comunidade.
+12. Execute [`supabase/migrations/20261107170000_recovery_funnel_media_sync.sql`](./supabase/migrations/20261107170000_recovery_funnel_media_sync.sql) para habilitar mídias múltiplas dos funis, sincronização e registro das mensagens enviadas. **Sem esta migração, os envios agendados de funil falham.**
+13. Execute [`supabase/migrations/20261107173000_community_group_logos.sql`](./supabase/migrations/20261107173000_community_group_logos.sql) para permitir configurar logos nos grupos.
+14. Execute [`supabase/migrations/20261107180000_storefront_customers_and_tokens.sql`](./supabase/migrations/20261107180000_storefront_customers_and_tokens.sql) para habilitar lojas públicas, perfis de clientes por loja e tokens de entrega.
+15. Execute [`supabase/migrations/20261107181000_storefront_background.sql`](./supabase/migrations/20261107181000_storefront_background.sql) para salvar a imagem de fundo personalizada da loja.
+16. Configure o `.env` com a URL e as chaves do **novo** projeto. `SUPABASE_SECRET_KEY` deve ficar somente no servidor e nunca em uma variável `VITE_*` ou `NEXT_PUBLIC_*`.
+17. Configure `ACCESS_TOKEN_ENCRYPTION_KEY` com um segredo aleatório de pelo menos 32 caracteres, somente no ambiente do servidor. Sem essa chave, a emissão e a consulta de tokens falham explicitamente.
+18. Configure o provedor de login Google em **Authentication → Providers** e adicione `http://localhost:3000` em **Authentication → URL Configuration → Redirect URLs**, se for usar esse login.
+19. Ao hospedar no Railway, mantenha **Settings → Build → Root Directory** na raiz do repositório (padrão/vazio). Os arquivos raiz `package.json` e `railway.json` fazem o Railpack detectar Node e encaminham instalação, build e inicialização para esta pasta do app. Configure as variáveis de ambiente antes do primeiro deploy: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`, usando as chaves do seu projeto. As variáveis `VITE_*` são incorporadas ao frontend durante o build; alterá-las exige um novo deploy. `SUPABASE_SECRET_KEY` é somente do servidor: nunca use o prefixo `VITE_` ou `NEXT_PUBLIC_` nela.
+20. O Railway executa `npm run build` e inicia o app com `npm start`, conforme a configuração da raiz. Em **Settings → Networking**, adicione `tigerbot.info` como domínio personalizado e configure no DNS os registros indicados pelo Railway. Aguarde o certificado HTTPS ficar ativo antes de usar o domínio. Nas variáveis do serviço, configure `PUBLIC_BASE_URL=https://tigerbot.info` e faça redeploy; isso define a URL pública usada nos webhooks do Telegram e notificações de pagamento. Sem `PUBLIC_BASE_URL`, o app detecta `RAILWAY_PUBLIC_DOMAIN` automaticamente. Webhooks não podem usar `localhost` ou HTTP.
+21. O servidor web processa os lembretes dos funis automaticamente, verificando envios pendentes a cada minuto; não é necessário um serviço Cron separado para os funis. Opcionalmente, configure um **segundo serviço Cron** no Railway com o comando `npm run followups`, a agenda `* * * * *` e as variáveis `PUBLIC_BASE_URL` (URL HTTPS pública do app) e `CRON_SECRET` (o mesmo segredo do serviço web) como redundância. Mantenha o endpoint `/api/public/jobs/maintenance` agendado a cada poucos minutos para confirmar pagamentos, atualizar saques e expirar assinaturas.
+22. Em **Supabase → Authentication → URL Configuration**, defina `https://tigerbot.info` como **Site URL** e adicione `https://tigerbot.info/**` em **Redirect URLs**, além dos endereços locais de desenvolvimento e callbacks exigidos pelos provedores de login.
+23. Execute [`supabase/migrations/20261108100000_maintenance_and_push_notifications.sql`](./supabase/migrations/20261108100000_maintenance_and_push_notifications.sql) para habilitar a manutenção global, o status público seguro e o registro privado de dispositivos para notificações.
+24. Execute [`supabase/migrations/20261108110000_recovery_funnel_service_role_permissions.sql`](./supabase/migrations/20261108110000_recovery_funnel_service_role_permissions.sql) para permitir que o servidor leia os vínculos entre funis e bots e as etapas agendadas. Sem essas permissões, o teste manual funciona, mas o `/start` não consegue enfileirar as mensagens automáticas.
+25. Execute [`supabase/migrations/20261110100000_telegram_media_metadata.sql`](./supabase/migrations/20261110100000_telegram_media_metadata.sql) para salvar os nomes, identificadores das mensagens e status de sincronização das mídias Telegram.
+26. Execute [`supabase/migrations/20261110110000_telegram_media_permissions.sql`](./supabase/migrations/20261110110000_telegram_media_permissions.sql) para garantir os privilégios SQL e as políticas RLS de bots e spoilers usados pelo upload direto ao Telegram. A política limita o acesso aos dados do próprio usuário; não habilite acesso público.
+
+Para receber notificações de Pix com o app Android fechado, crie um app Android no Firebase com o identificador `info.tigerbot.app`, habilite a API Firebase Cloud Messaging e coloque o arquivo `google-services.json` em `app_capacitor/android/app/`. Esse arquivo é ignorado pelo Git. No Railway, configure `FIREBASE_SERVICE_ACCOUNT_JSON` com o JSON da conta de serviço do Firebase Messaging, com permissão para enviar mensagens FCM, como segredo do servidor; nunca coloque essa credencial no frontend, no repositório ou em mensagens. Depois, gere e instale um APK uma vez com `npm --prefix app_capacitor run android:debug`. As mudanças comuns do frontend continuarão sendo carregadas pela Railway.
+
+O SQL contém apenas os dados fornecidos nesta configuração; outros registros históricos ainda precisam ser exportados e importados do banco de origem. A exportação precisa de acesso administrativo ao banco antigo; a chave pública do app não dá permissão para extrair esses dados. Mantenha os UUIDs dos usuários ou atualize os `owner_id` importados para os usuários recriados no projeto novo.
+
+Por segurança, o seed não cria/sobrescreve usuários em `auth.users` e não contém senha, token do Telegram, chave de API do gateway, segredo de webhook ou link privado de convite. Como essas credenciais foram compartilhadas durante a configuração, revogue/rotacione as chaves do bot e do gateway antes de cadastrar os novos valores pelo painel. O gateway e o bot importados ficam pausados até as credenciais serem configuradas. Os caminhos de fotos/vídeos são registrados, mas os arquivos precisam ser enviados para os buckets de Storage separadamente.
+
+A aba **Ranking** mostra os vendedores com mais vendas aprovadas na plataforma, atualiza a cada 15 segundos e usa o `@usuário` público do perfil; o primeiro, segundo e terceiro lugar recebem medalhas no pódio. A classificação considera a quantidade de vendas, não o faturamento.
+
+O painel web usa uma paleta escura grafite e roxa. Cada plano pode ser disponibilizado em todos os bots ou em bots escolhidos manualmente; os bots selecionados precisam estar como administradores no grupo VIP do plano. Na aba **Funis**, crie sequências com quantidade livre de etapas, texto, imagem ou vídeo e intervalo configurável. Associe um ou mais funis a cada bot; todos os funis associados começam após `/start` e param quando uma venda é aprovada.
+
+Na aba **Bot-Taxa**, conecte um segundo bot e informe a mensagem/imagem. Quando ativado para todos os bots, o checkout e o resumo antes do Pix informam a taxa fixa adicional de R$ 30,00 e o total previsto. Após o pagamento do plano, o comprador recebe um link com o ID do pedido; o Bot-Taxa valida que o pedido está pago e pertence ao mesmo ID do Telegram, cobra os R$ 30,00 via os gateways da conta e só então libera o grupo pelo bot original. Um `/start` sem compra válida não gera cobrança. A aba **Contas de teste** permite cadastrar IDs que não contam como starts, não geram QR/transação real e não aparecem nas métricas comerciais; registros de segurança não são apagados.
+
+O dashboard de vendas tem indicadores por período, gráficos de faturamento e conversão por bot, situação das cobranças, planos mais vendidos e atividade recente. Os cinco modelos de mensagem configuráveis por bot são: botão para revelar planos, lista clássica, catálogo em grade, oferta em destaque e resumo compacto.
+
+Os perfis de `alexandremoder0707@gmail.com` e `wirlencandido7@gmail.com` recebem o selo de verificado automaticamente no cadastro e aparecem com ele no perfil, no menu e durante a configuração inicial. A verificação é armazenada no banco e não pode ser alterada pelo próprio usuário.
+
+## Rodar localmente
+
+1. Instale o [Node.js](https://nodejs.org/) (inclui o npm).
+2. Configure o `.env` com o projeto Supabase novo.
+3. Execute `iniciar-localhost.bat`. Na primeira execução ele instala as dependências, inicia o servidor local e abre o navegador em `http://localhost:3000`.
+
+Também é possível iniciar manualmente:
+
+```sh
+npm install
+npm run dev -- --host 127.0.0.1 --port 3000
+```
+
+O login Google usa diretamente o Supabase Auth. Nunca coloque `SUPABASE_SECRET_KEY` em variáveis `VITE_*` ou `NEXT_PUBLIC_*` nem a compartilhe.

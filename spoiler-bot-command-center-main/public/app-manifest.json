@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "access": {
+    "type": "off_platform",
+    "url": "https://tigerbot.info"
+  },
+  "oauth": {
+    "scopes": [
+      "read:self",
+      "read:creator",
+      "write:creator"
+    ],
+    "redirectUris": [
+      "https://tigerbot.info/api/public/fanvue/callback"
+    ]
+  }
+}

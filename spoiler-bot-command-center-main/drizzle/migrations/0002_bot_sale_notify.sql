@@ -1,0 +1,1 @@
+ALTER TABLE public.bots ADD COLUMN IF NOT EXISTS notify_chat_id bigint;

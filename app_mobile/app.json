@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "FluxoBot",
+    "slug": "fluxobot-mobile",
+    "scheme": "fluxobot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fluxobot.mobile"
+    },
+    "android": {
+      "package": "com.fluxobot.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#080811",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "07b88ac3-0677-4084-b754-1f2a7bc3a117"
+      }
+    }
+  }
+}
